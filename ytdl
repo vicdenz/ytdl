@@ -33,7 +33,7 @@ EOF
 
 die() { echo "error: $1" >&2; exit 1; }
 
-MAX_TITLE=20
+MAX_TITLE=25
 VERBOSE=false
 URL=""
 START=""
