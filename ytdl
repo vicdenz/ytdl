@@ -85,11 +85,11 @@ command -v ffmpeg >/dev/null 2>&1 || die "ffmpeg not found. Install with: brew i
 args=(
   -x
   --audio-format wav
-  --postprocessor-args "ffmpeg:-ar 44100 -sample_fmt s24"
+  --postprocessor-args "ffmpeg_o:-ar 44100 -c:a pcm_s24le"
   --restrict-filenames
   --no-warnings
   --progress
-  -o "$OUTDIR/%(title).50s.wav"
+  -o "$OUTDIR/%(title).50s.%(ext)s"
 )
 
 if [[ -n "$START" && -n "$END" ]]; then
@@ -98,4 +98,6 @@ fi
 
 args+=("$URL")
 
-exec yt-dlp "${args[@]}"
+trap 'kill 0; exit 130' INT
+yt-dlp "${args[@]}" &
+wait $!
