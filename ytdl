@@ -17,6 +17,7 @@ Arguments:
 
 Options:
   -o DIR     Output directory (default: ~/Downloads)
+  --verbose  Show full yt-dlp and ffmpeg output
   -h         Show this help
   -v         Show version
 
@@ -33,6 +34,7 @@ EOF
 die() { echo "error: $1" >&2; exit 1; }
 
 MAX_TITLE=50
+VERBOSE=false
 URL=""
 START=""
 END=""
@@ -47,6 +49,7 @@ while [[ $# -gt 0 ]]; do
     -o|--outdir)
       [[ -z "${2:-}" ]] && die "-o requires a directory argument"
       OUTDIR="$2"; shift 2 ;;
+    --verbose)    VERBOSE=true; shift ;;
     -*)           die "unknown option: $1" ;;
     *)
       if [[ -z "$URL" ]]; then
@@ -96,7 +99,9 @@ TMPDIR=$(mktemp -d)
 trap 'printf "\n"; rm -rf "$TMPDIR"; kill 0 2>/dev/null; exit 130' INT
 trap 'rm -rf "$TMPDIR"' EXIT
 
-progress_bar 0 "fetching info..."
+if [[ "$VERBOSE" == false ]]; then
+  progress_bar 0 "fetching info..."
+fi
 TITLE=$(yt-dlp --restrict-filenames --print "%(title).${MAX_TITLE}s" "$URL" 2>/dev/null) || die "failed to fetch video title"
 OUTFILE="$OUTDIR/${TITLE}.wav"
 
@@ -104,9 +109,12 @@ dl_args=(
   -x
   --restrict-filenames
   --no-warnings
-  --newline
   -o "$TMPDIR/audio.%(ext)s"
 )
+
+if [[ "$VERBOSE" == false ]]; then
+  dl_args+=(--newline)
+fi
 
 if [[ -n "$START" && -n "$END" ]]; then
   dl_args+=(--download-sections "*${START}-${END}")
@@ -114,21 +122,29 @@ fi
 
 dl_args+=("$URL")
 
-yt-dlp "${dl_args[@]}" 2>/dev/null | while IFS= read -r line; do
-  if [[ "$line" =~ ([0-9]+(\.[0-9]+)?)% ]]; then
-    dl_pct=${BASH_REMATCH[1]%%.*}
-    pct=$((dl_pct * 90 / 100))
-    progress_bar "$pct" "downloading..."
-  fi
-done
-
-[[ ${PIPESTATUS[0]} -eq 0 ]] || die "yt-dlp download failed"
+if [[ "$VERBOSE" == true ]]; then
+  yt-dlp "${dl_args[@]}" || die "yt-dlp download failed"
+else
+  yt-dlp "${dl_args[@]}" 2>/dev/null | while IFS= read -r line; do
+    if [[ "$line" =~ ([0-9]+(\.[0-9]+)?)% ]]; then
+      dl_pct=${BASH_REMATCH[1]%%.*}
+      pct=$((dl_pct * 90 / 100))
+      progress_bar "$pct" "downloading..."
+    fi
+  done
+  [[ ${PIPESTATUS[0]} -eq 0 ]] || die "yt-dlp download failed"
+fi
 
 SRC=$(find "$TMPDIR" -type f | head -1)
 [[ -z "$SRC" ]] && die "no file downloaded"
 
-progress_bar 90 "converting..."
-ffmpeg -y -loglevel error -i "$SRC" -ar 44100 -c:a pcm_s24le "$OUTFILE" || die "ffmpeg conversion failed"
+if [[ "$VERBOSE" == true ]]; then
+  ffmpeg -y -i "$SRC" -ar 44100 -c:a pcm_s24le "$OUTFILE" || die "ffmpeg conversion failed"
+else
+  progress_bar 90 "converting..."
+  ffmpeg -y -loglevel error -i "$SRC" -ar 44100 -c:a pcm_s24le "$OUTFILE" || die "ffmpeg conversion failed"
+  progress_bar 100 "done"
+  printf "\n"
+fi
 
-progress_bar 100 "done"
-printf "\n  saved: %s\n" "$OUTFILE"
+echo "saved: $OUTFILE"
