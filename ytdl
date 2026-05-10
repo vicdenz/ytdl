@@ -83,18 +83,28 @@ mkdir -p "$OUTDIR" || die "cannot create output directory: $OUTDIR"
 command -v yt-dlp >/dev/null 2>&1 || die "yt-dlp not found. Install with: brew install yt-dlp"
 command -v ffmpeg >/dev/null 2>&1 || die "ffmpeg not found. Install with: brew install ffmpeg"
 
+BAR_WIDTH=40
+
+progress_bar() {
+  local pct=$1 label=$2
+  local filled=$((pct * BAR_WIDTH / 100))
+  local empty=$((BAR_WIDTH - filled))
+  printf "\r  [%-${BAR_WIDTH}s] %3d%%  %s" "$(printf '#%.0s' $(seq 1 $filled 2>/dev/null))" "$pct" "$label"
+}
+
 TMPDIR=$(mktemp -d)
-trap 'rm -rf "$TMPDIR"; kill 0 2>/dev/null; exit 130' INT
+trap 'printf "\n"; rm -rf "$TMPDIR"; kill 0 2>/dev/null; exit 130' INT
 trap 'rm -rf "$TMPDIR"' EXIT
 
-TITLE=$(yt-dlp --restrict-filenames --print "%(title).${MAX_TITLE}s" "$URL") || die "failed to fetch video title"
+progress_bar 0 "fetching info..."
+TITLE=$(yt-dlp --restrict-filenames --print "%(title).${MAX_TITLE}s" "$URL" 2>/dev/null) || die "failed to fetch video title"
 OUTFILE="$OUTDIR/${TITLE}.wav"
 
 dl_args=(
   -x
   --restrict-filenames
   --no-warnings
-  --progress
+  --newline
   -o "$TMPDIR/audio.%(ext)s"
 )
 
@@ -104,11 +114,21 @@ fi
 
 dl_args+=("$URL")
 
-yt-dlp "${dl_args[@]}" || die "yt-dlp download failed"
+yt-dlp "${dl_args[@]}" 2>/dev/null | while IFS= read -r line; do
+  if [[ "$line" =~ ([0-9]+(\.[0-9]+)?)% ]]; then
+    dl_pct=${BASH_REMATCH[1]%%.*}
+    pct=$((dl_pct * 90 / 100))
+    progress_bar "$pct" "downloading..."
+  fi
+done
+
+[[ ${PIPESTATUS[0]} -eq 0 ]] || die "yt-dlp download failed"
 
 SRC=$(find "$TMPDIR" -type f | head -1)
 [[ -z "$SRC" ]] && die "no file downloaded"
 
-ffmpeg -y -i "$SRC" -ar 44100 -c:a pcm_s24le "$OUTFILE" || die "ffmpeg conversion failed"
+progress_bar 90 "converting..."
+ffmpeg -y -loglevel error -i "$SRC" -ar 44100 -c:a pcm_s24le "$OUTFILE" || die "ffmpeg conversion failed"
 
-echo "saved: $OUTFILE"
+progress_bar 100 "done"
+printf "\n  saved: %s\n" "$OUTFILE"

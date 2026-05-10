@@ -4,6 +4,13 @@
 
 A simple bash CLI tool that wraps yt-dlp and ffmpeg to download YouTube audio as 44.1kHz / 24-bit WAV files, optimized for Ableton / DAW sampling workflows. macOS only (Homebrew dependencies).
 
+## How It Works
+
+1. Fetches video title via yt-dlp (for filename)
+2. Downloads and extracts audio to a temp directory with yt-dlp
+3. Converts to 44.1kHz / 24-bit WAV with ffmpeg
+4. Cleans up temp files
+
 ## Project Structure
 
 - `ytdl` — the CLI script (bash, executable)
