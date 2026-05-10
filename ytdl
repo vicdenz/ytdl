@@ -82,22 +82,32 @@ mkdir -p "$OUTDIR" || die "cannot create output directory: $OUTDIR"
 command -v yt-dlp >/dev/null 2>&1 || die "yt-dlp not found. Install with: brew install yt-dlp"
 command -v ffmpeg >/dev/null 2>&1 || die "ffmpeg not found. Install with: brew install ffmpeg"
 
-args=(
+TMPDIR=$(mktemp -d)
+trap 'rm -rf "$TMPDIR"; kill 0 2>/dev/null; exit 130' INT
+trap 'rm -rf "$TMPDIR"' EXIT
+
+TITLE=$(yt-dlp --restrict-filenames --print "%(title).50s" "$URL") || die "failed to fetch video title"
+OUTFILE="$OUTDIR/${TITLE}.wav"
+
+dl_args=(
   -x
-  --audio-format wav
-  --postprocessor-args "ffmpeg_o:-ar 44100 -c:a pcm_s24le"
   --restrict-filenames
   --no-warnings
   --progress
-  -o "$OUTDIR/%(title).50s.%(ext)s"
+  -o "$TMPDIR/audio.%(ext)s"
 )
 
 if [[ -n "$START" && -n "$END" ]]; then
-  args+=(--download-sections "*${START}-${END}")
+  dl_args+=(--download-sections "*${START}-${END}")
 fi
 
-args+=("$URL")
+dl_args+=("$URL")
 
-trap 'kill 0; exit 130' INT
-yt-dlp "${args[@]}" &
-wait $!
+yt-dlp "${dl_args[@]}" || die "yt-dlp download failed"
+
+SRC=$(find "$TMPDIR" -type f | head -1)
+[[ -z "$SRC" ]] && die "no file downloaded"
+
+ffmpeg -y -i "$SRC" -ar 44100 -c:a pcm_s24le "$OUTFILE" || die "ffmpeg conversion failed"
+
+echo "saved: $OUTFILE"
