@@ -1,6 +1,6 @@
 # ytdl
 
-Download YouTube audio as production-ready WAV files (44.1kHz / 24-bit). Built for sampling in Ableton and other DAWs.
+A simple CLI tool for downloading YouTube audio as production-ready WAV files. Built for Ableton users who want to quickly sample from YouTube with output configured to 44.1kHz / 24-bit WAV — ready to drag straight into a project. Tailored for macOS with Homebrew-based dependency management.
 
 ## Dependencies
 
