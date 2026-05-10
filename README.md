@@ -4,7 +4,7 @@ CLI tool for downloading YouTube audio as production-ready WAV files. Built for 
 
 ## Why
 
-There are plenty of YouTube downloading tools out there. I built this one because I needed something dead simple and opinionated for my Ableton workflow — no format options to think about, no config, just a URL and optionally a time range. If you're also sampling from YouTube into a DAW, hopefully this saves you some time too.
+There are plenty of YouTube downloading tools out there. I built this one because I needed something super simple and specific for my Ableton workflow; no format options to think about, no config, just a URL and optionally a time range. If you're also tech-savvy and sample from YouTube into a DAW, hopefully this saves you some time while making music.
 
 ## Dependencies
 
