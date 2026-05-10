@@ -13,6 +13,7 @@ A simple bash CLI tool that wraps yt-dlp and ffmpeg to download YouTube audio as
 
 ## Commits
 
+- Always commit at the end of each prompt.
 - Always make small, incremental commits. Each logical change gets its own commit.
 - One-sentence commit messages. Describe what changed, not why.
 - Never batch multiple unrelated changes into a single commit.
