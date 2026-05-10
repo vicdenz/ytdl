@@ -81,7 +81,8 @@ stderr_contains "-o without dir errors" "-o requires a directory" $YTDL -o
 echo "Testing output directory..."
 
 TMPDIR=$(mktemp -d)
-output_contains "-o accepts custom dir" "Usage:" $YTDL -h
+run_fail "-o rejects missing dir arg" $YTDL -o
+output_contains "-o parses before url" "url is required" $YTDL -o "$TMPDIR"
 rm -rf "$TMPDIR"
 
 # --- argument parsing (dry run via --simulate) ---
