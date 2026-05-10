@@ -37,8 +37,9 @@ ytdl "https://youtube.com/watch?v=abc123" 1:30 3:45 -o ~/Music/Samples
 ## Output
 
 - Format: WAV (44.1kHz / 24-bit)
-- Filenames are sanitized (no spaces or special characters) and truncated to 50 characters
+- Filenames are sanitized (no spaces or special characters) and truncated to 25 characters
 - Default output directory: `~/Downloads`
+- When using timestamps, the full audio is downloaded first and trimmed locally — this is fast for typical videos but may be slow for very long ones (10+ hours)
 
 ## Uninstall
 
