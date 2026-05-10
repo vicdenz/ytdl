@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+VERSION="1.0.0"
+
+usage() {
+  cat <<EOF
+ytdl v${VERSION} — Download YouTube audio as production-ready WAV
+
+Usage:
+  ytdl <url> [start] [end] [-o dir]
+
+Arguments:
+  url        YouTube URL (required)
+  start      Start timestamp, e.g. 1:30 (optional)
+  end        End timestamp, e.g. 3:45 (required if start is set)
+
+Options:
+  -o DIR     Output directory (default: ~/Downloads)
+  -h         Show this help
+  -v         Show version
+
+Output:
+  44.1kHz / 24-bit WAV, filename sanitized and truncated to 50 chars.
+
+Examples:
+  ytdl "https://youtube.com/watch?v=abc123"
+  ytdl "https://youtube.com/watch?v=abc123" 1:30 3:45
+  ytdl "https://youtube.com/watch?v=abc123" 1:30 3:45 -o ~/Music/Samples
+EOF
+}
+
+die() { echo "error: $1" >&2; exit 1; }
+
+command -v yt-dlp >/dev/null 2>&1 || die "yt-dlp not found. Install with: brew install yt-dlp"
+command -v ffmpeg >/dev/null 2>&1 || die "ffmpeg not found. Install with: brew install ffmpeg"
+
+URL=""
+START=""
+END=""
+OUTDIR="$HOME/Downloads"
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -h|--help)    usage; exit 0 ;;
+    -v|--version) echo "ytdl v${VERSION}"; exit 0 ;;
+    -o|--outdir)  OUTDIR="$2"; shift 2 ;;
+    -*)           die "unknown option: $1" ;;
+    *)
+      if [[ -z "$URL" ]]; then
+        URL="$1"
+      elif [[ -z "$START" ]]; then
+        START="$1"
+      elif [[ -z "$END" ]]; then
+        END="$1"
+      else
+        die "unexpected argument: $1"
+      fi
+      shift
+      ;;
+  esac
+done
+
+[[ -z "$URL" ]] && { usage; die "url is required"; }
+[[ -n "$START" && -z "$END" ]] && die "start timestamp requires an end timestamp"
+[[ -n "$END" && -z "$START" ]] && die "end timestamp requires a start timestamp"
+mkdir -p "$OUTDIR" || die "cannot create output directory: $OUTDIR"
+
+args=(
+  -x
+  --audio-format wav
+  --postprocessor-args "ffmpeg:-ar 44100 -sample_fmt s24"
+  --restrict-filenames
+  --no-warnings
+  --progress
+  -o "$OUTDIR/%(title).50s.wav"
+)
+
+if [[ -n "$START" && -n "$END" ]]; then
+  args+=(--download-sections "*${START}-${END}")
+fi
+
+args+=("$URL")
+
+exec yt-dlp "${args[@]}"
