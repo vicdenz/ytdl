@@ -37,7 +37,7 @@ ytdl "https://youtube.com/watch?v=abc123" 1:30 3:45 -o ~/Music/Samples
 ## Output
 
 - Format: WAV (44.1kHz / 24-bit)
-- Filenames are sanitized (no spaces or special characters) and truncated to 25 characters
+- Filenames are sanitized (no spaces or special characters) and truncated to 50 characters
 - Default output directory: `~/Downloads`
 
 ## Uninstall
