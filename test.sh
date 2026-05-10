@@ -34,7 +34,7 @@ output_contains() {
   shift 2
   local output
   output=$("$@" 2>&1) || true
-  if echo "$output" | grep -q "$expected"; then
+  if echo "$output" | grep -qF -- "$expected"; then
     pass "$desc"
   else
     fail "$desc — expected '$expected' in output"
@@ -47,7 +47,7 @@ stderr_contains() {
   shift 2
   local output
   output=$("$@" 2>&1) || true
-  if echo "$output" | grep -q "$expected"; then
+  if echo "$output" | grep -qF -- "$expected"; then
     pass "$desc"
   else
     fail "$desc — expected '$expected' in stderr"
@@ -65,17 +65,23 @@ output_contains "--version shows version" "ytdl v" $YTDL --version
 # --- argument validation ---
 echo "Testing argument validation..."
 
-run_fail "no args exits with error" $YTDL
-stderr_contains "no args shows url required" "url is required" $YTDL
+output_contains "no args shows usage" "Usage:" $YTDL
+run "no args exits successfully" $YTDL
+output_contains "help bare word shows usage" "Usage:" $YTDL help
+output_contains "version bare word shows version" "ytdl v" $YTDL version
 stderr_contains "unknown option errors" "unknown option" $YTDL --badflag
 stderr_contains "start without end errors" "start timestamp requires an end" $YTDL "https://youtube.com/watch?v=test" 1:30
-stderr_contains "too many positional args errors" "unexpected argument" $YTDL "url" "1:30" "3:45" "extra"
+stderr_contains "invalid URL errors" "not a valid YouTube URL" $YTDL "not-a-url"
+stderr_contains "invalid start timestamp errors" "invalid start timestamp" $YTDL "https://youtube.com/watch?v=test" "abc" "3:45"
+stderr_contains "invalid end timestamp errors" "invalid end timestamp" $YTDL "https://youtube.com/watch?v=test" "1:30" "xyz"
+stderr_contains "too many positional args errors" "unexpected argument" $YTDL "https://youtube.com/watch?v=test" "1:30" "3:45" "extra"
+stderr_contains "-o without dir errors" "-o requires a directory" $YTDL -o
 
 # --- output directory ---
 echo "Testing output directory..."
 
 TMPDIR=$(mktemp -d)
-output_contains "-o accepts custom dir" "Usage\|error\|yt-dlp" $YTDL -h
+output_contains "-o accepts custom dir" "Usage:" $YTDL -h
 rm -rf "$TMPDIR"
 
 # --- argument parsing (dry run via --simulate) ---
