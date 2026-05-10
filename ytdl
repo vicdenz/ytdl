@@ -104,6 +104,13 @@ if [[ "$VERBOSE" == false ]]; then
 fi
 TITLE=$(yt-dlp --restrict-filenames --print "%(title).${MAX_TITLE}s" "$URL" 2>/dev/null) || die "failed to fetch video title"
 OUTFILE="$OUTDIR/${TITLE}.wav"
+if [[ -f "$OUTFILE" ]]; then
+  n=2
+  while [[ -f "$OUTDIR/${TITLE}_${n}.wav" ]]; do
+    n=$((n + 1))
+  done
+  OUTFILE="$OUTDIR/${TITLE}_${n}.wav"
+fi
 
 dl_args=(
   -x
