@@ -14,8 +14,17 @@ else
   INSTALL_DIR="/usr/local/bin"
 fi
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+LOCAL_SCRIPT="${SCRIPT_DIR}/ytdl"
+REPO_URL="https://raw.githubusercontent.com/vicdenz/ytdl/main/ytdl"
 
-echo "Installing ytdl to ${INSTALL_DIR}..."
-chmod +x "${SCRIPT_DIR}/ytdl"
-ln -sf "${SCRIPT_DIR}/ytdl" "${INSTALL_DIR}/ytdl"
+if [[ -f "$LOCAL_SCRIPT" ]]; then
+  echo "Installing ytdl to ${INSTALL_DIR}..."
+  chmod +x "$LOCAL_SCRIPT"
+  ln -sf "$LOCAL_SCRIPT" "${INSTALL_DIR}/ytdl"
+else
+  echo "Downloading ytdl to ${INSTALL_DIR}..."
+  curl -fsSL "$REPO_URL" -o "${INSTALL_DIR}/ytdl"
+  chmod +x "${INSTALL_DIR}/ytdl"
+fi
+
 echo "Done. Run 'ytdl --help' to get started."
