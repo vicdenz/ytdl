@@ -8,7 +8,11 @@ command -v brew >/dev/null 2>&1 || die "Homebrew not found. Install from https:/
 echo "Installing dependencies..."
 brew install yt-dlp ffmpeg 2>/dev/null || brew upgrade yt-dlp ffmpeg 2>/dev/null
 
-INSTALL_DIR="/usr/local/bin"
+if [[ -d "/opt/homebrew/bin" ]]; then
+  INSTALL_DIR="/opt/homebrew/bin"
+else
+  INSTALL_DIR="/usr/local/bin"
+fi
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 echo "Installing ytdl to ${INSTALL_DIR}..."
