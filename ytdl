@@ -12,8 +12,8 @@ Usage:
 
 Arguments:
   url        YouTube URL (required)
-  start      Start timestamp, e.g. 1:30 (optional)
-  end        End timestamp, e.g. 3:45 (required if start is set)
+  start      Start timestamp as MM:SS or HH:MM:SS (optional)
+  end        End timestamp as MM:SS or HH:MM:SS (required if start is set)
 
 Options:
   -o DIR     Output directory (default: ~/Downloads)
