@@ -21,7 +21,7 @@ Options:
   -v         Show version
 
 Output:
-  44.1kHz / 24-bit WAV, filename sanitized and truncated to 50 chars.
+  44.1kHz / 24-bit WAV, filename sanitized and truncated to ${MAX_TITLE} chars.
 
 Examples:
   ytdl "https://youtube.com/watch?v=abc123"
@@ -32,6 +32,7 @@ EOF
 
 die() { echo "error: $1" >&2; exit 1; }
 
+MAX_TITLE=50
 URL=""
 START=""
 END=""
@@ -86,7 +87,7 @@ TMPDIR=$(mktemp -d)
 trap 'rm -rf "$TMPDIR"; kill 0 2>/dev/null; exit 130' INT
 trap 'rm -rf "$TMPDIR"' EXIT
 
-TITLE=$(yt-dlp --restrict-filenames --print "%(title).50s" "$URL") || die "failed to fetch video title"
+TITLE=$(yt-dlp --restrict-filenames --print "%(title).${MAX_TITLE}s" "$URL") || die "failed to fetch video title"
 OUTFILE="$OUTDIR/${TITLE}.wav"
 
 dl_args=(
