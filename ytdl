@@ -33,7 +33,7 @@ EOF
 
 die() { echo "error: $1" >&2; exit 1; }
 
-MAX_TITLE=50
+MAX_TITLE=20
 VERBOSE=false
 URL=""
 START=""
@@ -124,16 +124,12 @@ if [[ "$VERBOSE" == false ]]; then
   dl_args+=(--newline --progress-template "%(progress._percent_str)s")
 fi
 
-if [[ -n "$START" && -n "$END" ]]; then
-  dl_args+=(--download-sections "*${START}-${END}")
-fi
-
 dl_args+=("$URL")
 
 if [[ "$VERBOSE" == true ]]; then
   yt-dlp "${dl_args[@]}" || die "yt-dlp download failed"
 else
-  stdbuf -oL yt-dlp "${dl_args[@]}" 2>/dev/null | while IFS= read -r line; do
+  PYTHONUNBUFFERED=1 yt-dlp "${dl_args[@]}" 2>/dev/null | while IFS= read -r line; do
     if [[ "$line" =~ ([0-9]+(\.[0-9]+)?)% ]]; then
       dl_pct=${BASH_REMATCH[1]%%.*}
       pct=$((dl_pct * 90 / 100))
@@ -146,11 +142,17 @@ fi
 SRC=$(find "$TMPDIR" -type f | head -1)
 [[ -z "$SRC" ]] && die "no file downloaded"
 
+ff_args=(-y)
+[[ "$VERBOSE" == false ]] && ff_args+=(-loglevel error)
+ff_args+=(-i "$SRC")
+[[ -n "$START" && -n "$END" ]] && ff_args+=(-ss "$START" -to "$END")
+ff_args+=(-ar 44100 -c:a pcm_s24le "$OUTFILE")
+
 if [[ "$VERBOSE" == true ]]; then
-  ffmpeg -y -i "$SRC" -ar 44100 -c:a pcm_s24le "$OUTFILE" || die "ffmpeg conversion failed"
+  ffmpeg "${ff_args[@]}" || die "ffmpeg conversion failed"
 else
   progress_bar 90 "converting..."
-  ffmpeg -y -loglevel error -i "$SRC" -ar 44100 -c:a pcm_s24le "$OUTFILE" || die "ffmpeg conversion failed"
+  ffmpeg "${ff_args[@]}" || die "ffmpeg conversion failed"
   progress_bar 100 "done"
   printf "\n"
 fi
