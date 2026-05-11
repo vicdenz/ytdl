@@ -52,8 +52,10 @@ ytdl "https://youtube.com/watch?v=abc123" 1:30 3:45 -o ~/Music/Samples
 ## Uninstall
 
 ```bash
-sudo ./uninstall.sh
+./uninstall.sh
 ```
+
+> On Intel Macs, install and uninstall may require `sudo`.
 
 ## License
 
