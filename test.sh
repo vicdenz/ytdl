@@ -70,7 +70,6 @@ output_contains "-o without dir errors" "-o requires a directory" $YTDL -o
 echo "Testing output directory..."
 
 TEST_DIR=$(mktemp -d)
-run_fail "-o rejects missing dir arg" $YTDL -o
 output_contains "-o parses before url" "url is required" $YTDL -o "$TEST_DIR"
 rm -rf "$TEST_DIR"
 
