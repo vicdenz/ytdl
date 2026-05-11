@@ -135,8 +135,7 @@ else
       pct=$((dl_pct * 90 / 100))
       progress_bar "$pct" "downloading..."
     fi
-  done
-  [[ ${PIPESTATUS[0]} -eq 0 ]] || die "yt-dlp download failed"
+  done || die "yt-dlp download failed"
 fi
 
 SRC=$(find "$TMPDIR" -type f | head -1)
