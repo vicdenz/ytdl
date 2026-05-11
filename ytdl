@@ -95,9 +95,9 @@ progress_bar() {
   printf "\r  [%-${BAR_WIDTH}s] %3d%%  %s" "$(printf '#%.0s' $(seq 1 $filled 2>/dev/null))" "$pct" "$label"
 }
 
-TMPDIR=$(mktemp -d)
-trap 'printf "\n"; rm -rf "$TMPDIR"; kill 0 2>/dev/null; exit 130' INT
-trap 'rm -rf "$TMPDIR"' EXIT
+WORK_DIR=$(mktemp -d)
+trap 'printf "\n"; rm -rf "$WORK_DIR"; kill 0 2>/dev/null; exit 130' INT
+trap 'rm -rf "$WORK_DIR"' EXIT
 
 if [[ "$VERBOSE" == false ]]; then
   progress_bar 0 "fetching info..."
@@ -117,7 +117,7 @@ dl_args=(
   -x
   --restrict-filenames
   --no-warnings
-  -o "$TMPDIR/audio.%(ext)s"
+  -o "$WORK_DIR/audio.%(ext)s"
 )
 
 if [[ "$VERBOSE" == false ]]; then
@@ -138,7 +138,7 @@ else
   done || die "yt-dlp download failed"
 fi
 
-SRC=$(find "$TMPDIR" -type f | head -1)
+SRC=$(find "$WORK_DIR" -type f | head -1)
 [[ -z "$SRC" ]] && die "no file downloaded"
 
 ff_args=(-y)
