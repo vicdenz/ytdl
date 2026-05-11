@@ -13,6 +13,10 @@ if [[ -d "/opt/homebrew/bin" ]]; then
 else
   INSTALL_DIR="/usr/local/bin"
 fi
+if [[ ! -w "$INSTALL_DIR" ]]; then
+  die "cannot write to ${INSTALL_DIR} — re-run with sudo"
+fi
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 LOCAL_SCRIPT="${SCRIPT_DIR}/ytdl"
 REPO_URL="https://raw.githubusercontent.com/vicdenz/ytdl/main/ytdl"
