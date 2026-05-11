@@ -15,7 +15,7 @@ Both are installed automatically by the install script via [Homebrew](https://br
 
 ## Install
 
-**Quick install** (no clone required):
+**Quick install** (no clone required, always fetches latest version):
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/vicdenz/ytdl/main/install.sh | bash
