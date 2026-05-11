@@ -44,33 +44,33 @@ output_contains() {
 # --- help and version ---
 echo "Testing help and version flags..."
 
-output_contains "-h shows usage" "Usage:" $YTDL -h
-output_contains "--help shows usage" "Usage:" $YTDL --help
-output_contains "-v shows version" "ytdl v" $YTDL -v
-output_contains "--version shows version" "ytdl v" $YTDL --version
+output_contains "-h shows usage" "Usage:" "$YTDL" -h
+output_contains "--help shows usage" "Usage:" "$YTDL" --help
+output_contains "-v shows version" "ytdl v" "$YTDL" -v
+output_contains "--version shows version" "ytdl v" "$YTDL" --version
 
 # --- argument validation ---
 echo "Testing argument validation..."
 
-output_contains "no args shows usage" "Usage:" $YTDL
-run "no args exits successfully" $YTDL
-output_contains "help bare word shows usage" "Usage:" $YTDL help
-output_contains "version bare word shows version" "ytdl v" $YTDL version
-output_contains "unknown option errors" "unknown option" $YTDL --badflag
-output_contains "start without end errors" "start timestamp requires an end" $YTDL "https://youtube.com/watch?v=test" 1:30
-output_contains "invalid URL errors" "not a valid YouTube URL" $YTDL "not-a-url"
-output_contains "invalid start timestamp errors" "invalid start timestamp" $YTDL "https://youtube.com/watch?v=test" "abc" "3:45"
-output_contains "invalid end timestamp errors" "invalid end timestamp" $YTDL "https://youtube.com/watch?v=test" "1:30" "xyz"
-output_contains "start after end errors" "start timestamp must be before end" $YTDL "https://youtube.com/watch?v=test" "5:00" "2:00"
-output_contains "start equals end errors" "start timestamp must be before end" $YTDL "https://youtube.com/watch?v=test" "1:30" "1:30"
-output_contains "too many positional args errors" "unexpected argument" $YTDL "https://youtube.com/watch?v=test" "1:30" "3:45" "extra"
-output_contains "-o without dir errors" "-o requires a directory" $YTDL -o
+output_contains "no args shows usage" "Usage:" "$YTDL"
+run "no args exits successfully" "$YTDL"
+output_contains "help bare word shows usage" "Usage:" "$YTDL" help
+output_contains "version bare word shows version" "ytdl v" "$YTDL" version
+output_contains "unknown option errors" "unknown option" "$YTDL" --badflag
+output_contains "start without end errors" "start timestamp requires an end" "$YTDL" "https://youtube.com/watch?v=test" 1:30
+output_contains "invalid URL errors" "not a valid YouTube URL" "$YTDL" "not-a-url"
+output_contains "invalid start timestamp errors" "invalid start timestamp" "$YTDL" "https://youtube.com/watch?v=test" "abc" "3:45"
+output_contains "invalid end timestamp errors" "invalid end timestamp" "$YTDL" "https://youtube.com/watch?v=test" "1:30" "xyz"
+output_contains "start after end errors" "start timestamp must be before end" "$YTDL" "https://youtube.com/watch?v=test" "5:00" "2:00"
+output_contains "start equals end errors" "start timestamp must be before end" "$YTDL" "https://youtube.com/watch?v=test" "1:30" "1:30"
+output_contains "too many positional args errors" "unexpected argument" "$YTDL" "https://youtube.com/watch?v=test" "1:30" "3:45" "extra"
+output_contains "-o without dir errors" "-o requires a directory" "$YTDL" -o
 
 # --- output directory ---
 echo "Testing output directory..."
 
 TEST_DIR=$(mktemp -d)
-output_contains "-o parses before url" "url is required" $YTDL -o "$TEST_DIR"
+output_contains "-o parses before url" "url is required" "$YTDL" -o "$TEST_DIR"
 rm -rf "$TEST_DIR"
 
 # --- argument parsing (dry run via --simulate) ---
@@ -79,8 +79,8 @@ echo "Testing argument parsing with yt-dlp --simulate..."
 if command -v yt-dlp >/dev/null 2>&1; then
   # Verify the script builds correct yt-dlp args by checking help/version
   # (we can't fully dry-run without a real URL, but we can verify parsing)
-  output_contains "help flag takes priority over url" "Usage:" $YTDL -h "https://youtube.com/watch?v=test"
-  output_contains "version flag takes priority" "ytdl v" $YTDL -v "https://youtube.com/watch?v=test"
+  output_contains "help flag takes priority over url" "Usage:" "$YTDL" -h "https://youtube.com/watch?v=test"
+  output_contains "version flag takes priority" "ytdl v" "$YTDL" -v "https://youtube.com/watch?v=test"
 else
   echo "  SKIP: yt-dlp not installed, skipping integration tests"
 fi
