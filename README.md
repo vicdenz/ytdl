@@ -15,10 +15,18 @@ Both are installed automatically by the install script via [Homebrew](https://br
 
 ## Install
 
+**Quick install** (no clone required, always fetches latest version):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/vicdenz/ytdl/main/install.sh | bash
+```
+
+**From source:**
+
 ```bash
 git clone https://github.com/vicdenz/ytdl.git
 cd ytdl
-sudo ./install.sh
+./install.sh
 ```
 
 ## Usage
@@ -37,15 +45,17 @@ ytdl "https://youtube.com/watch?v=abc123" 1:30 3:45 -o ~/Music/Samples
 ## Output
 
 - Format: WAV (44.1kHz / 24-bit)
-- Filenames are sanitized (no spaces or special characters) and truncated to 25 characters
+- Filenames are sanitized (no spaces or special characters) and truncated to 50 characters
 - Default output directory: `~/Downloads`
 - When using timestamps, the full audio is downloaded first and trimmed locally — this is fast for typical videos but may be slow for very long ones (10+ hours)
 
 ## Uninstall
 
 ```bash
-sudo ./uninstall.sh
+./uninstall.sh
 ```
+
+> On Intel Macs, install and uninstall may require `sudo`.
 
 ## License
 
