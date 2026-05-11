@@ -83,7 +83,6 @@ if [[ ! "$URL" =~ ^https?://(www\.)?(youtube\.com|youtu\.be|music\.youtube\.com)
 fi
 
 [[ -n "$START" && -z "$END" ]] && die "start timestamp requires an end timestamp"
-[[ -n "$END" && -z "$START" ]] && die "end timestamp requires a start timestamp"
 
 ts_pattern='^([0-9]{1,2}:)?[0-9]{1,2}:[0-9]{2}$'
 if [[ -n "$START" ]]; then
@@ -102,7 +101,6 @@ BAR_WIDTH=40
 progress_bar() {
   local pct=$1 label=$2
   local filled=$((pct * BAR_WIDTH / 100))
-  local empty=$((BAR_WIDTH - filled))
   printf "\r  [%-${BAR_WIDTH}s] %3d%%  %s" "$(printf '#%.0s' $(seq 1 $filled 2>/dev/null))" "$pct" "$label"
 }
 
