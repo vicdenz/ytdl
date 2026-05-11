@@ -33,6 +33,16 @@ EOF
 
 die() { echo "error: $1" >&2; exit 1; }
 
+ts_to_seconds() {
+  local parts
+  IFS=: read -ra parts <<< "$1"
+  local secs=0
+  for part in "${parts[@]}"; do
+    secs=$((secs * 60 + 10#$part))
+  done
+  echo "$secs"
+}
+
 MAX_TITLE=50
 VERBOSE=false
 URL=""
@@ -79,6 +89,7 @@ ts_pattern='^([0-9]{1,2}:)?[0-9]{1,2}:[0-9]{2}$'
 if [[ -n "$START" ]]; then
   [[ "$START" =~ $ts_pattern ]] || die "invalid start timestamp: $START (expected MM:SS or HH:MM:SS)"
   [[ "$END" =~ $ts_pattern ]] || die "invalid end timestamp: $END (expected MM:SS or HH:MM:SS)"
+  [[ $(ts_to_seconds "$START") -lt $(ts_to_seconds "$END") ]] || die "start timestamp must be before end timestamp"
 fi
 
 mkdir -p "$OUTDIR" || die "cannot create output directory: $OUTDIR"

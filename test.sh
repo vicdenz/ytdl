@@ -74,6 +74,8 @@ stderr_contains "start without end errors" "start timestamp requires an end" $YT
 stderr_contains "invalid URL errors" "not a valid YouTube URL" $YTDL "not-a-url"
 stderr_contains "invalid start timestamp errors" "invalid start timestamp" $YTDL "https://youtube.com/watch?v=test" "abc" "3:45"
 stderr_contains "invalid end timestamp errors" "invalid end timestamp" $YTDL "https://youtube.com/watch?v=test" "1:30" "xyz"
+stderr_contains "start after end errors" "start timestamp must be before end" $YTDL "https://youtube.com/watch?v=test" "5:00" "2:00"
+stderr_contains "start equals end errors" "start timestamp must be before end" $YTDL "https://youtube.com/watch?v=test" "1:30" "1:30"
 stderr_contains "too many positional args errors" "unexpected argument" $YTDL "https://youtube.com/watch?v=test" "1:30" "3:45" "extra"
 stderr_contains "-o without dir errors" "-o requires a directory" $YTDL -o
 
